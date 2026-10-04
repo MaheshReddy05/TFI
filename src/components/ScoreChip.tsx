@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
-  Keyframe,
+  interpolate,
   useAnimatedStyle,
   useSharedValue,
   withSequence,
@@ -12,11 +12,7 @@ import Animated, {
 import { fonts, motion, radius } from '../theme/tokens';
 import { T } from './Typography';
 
-const plusOne = new Keyframe({
-  0: { opacity: 0, transform: [{ translateY: 4 }] },
-  20: { opacity: 1, transform: [{ translateY: -4 }] },
-  100: { opacity: 0, transform: [{ translateY: -26 }] },
-}).duration(700);
+const PLUS_MS = 700;
 
 /** Running score with a pop + floating "+1" whenever it goes up. */
 export function ScoreChip({
@@ -33,8 +29,9 @@ export function ScoreChip({
   size?: 'md' | 'lg';
 }) {
   const scale = useSharedValue(1);
+  /** 0 → 1 once per point. Drives the "+1" float entirely on the UI thread. */
+  const plus = useSharedValue(0);
   const prev = useRef(score);
-  const [bumps, setBumps] = useState(0);
 
   useEffect(() => {
     if (score > prev.current) {
@@ -44,12 +41,21 @@ export function ScoreChip({
           withSpring(1, { duration: 350, dampingRatio: 0.5 }),
         ),
       );
-      setBumps((b) => b + 1);
+      plus.set(withSequence(withTiming(0, { duration: 0 }), withTiming(1, { duration: PLUS_MS })));
     }
     prev.current = score;
-  }, [score, scale]);
+  }, [score, scale, plus]);
 
   const popStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.get() }] }));
+  // Rises and fades out; rests at opacity 0, so it never needs to mount or unmount.
+  const plusStyle = useAnimatedStyle(() => {
+    const p = plus.get();
+    return {
+      opacity: interpolate(p, [0, 0.2, 1], [0, 1, 0], 'clamp'),
+      transform: [{ translateY: interpolate(p, [0, 0.2, 1], [4, -4, -26], 'clamp') }],
+    };
+  });
+
   const big = size === 'lg';
 
   return (
@@ -64,13 +70,17 @@ export function ScoreChip({
           {score}
         </T>
       </Animated.View>
-      {bumps > 0 && (
-        <Animated.View key={bumps} entering={plusOne} style={styles.plus} pointerEvents="none">
-          <T variant="black" color={plusColor} size={18}>
-            +1
-          </T>
-        </Animated.View>
-      )}
+      {/* Always mounted, so it stays hidden from screen readers on both platforms. */}
+      <Animated.View
+        style={[styles.plus, plusStyle]}
+        pointerEvents="none"
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      >
+        <T variant="black" color={plusColor} size={18}>
+          +1
+        </T>
+      </Animated.View>
     </View>
   );
 }
@@ -90,6 +100,5 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: -26,
     alignSelf: 'center',
-    opacity: 0,
   },
 });
