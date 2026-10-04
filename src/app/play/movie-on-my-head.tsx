@@ -1,4 +1,3 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { useKeepAwake } from 'expo-keep-awake';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
@@ -19,6 +18,7 @@ import { Countdown } from '../../components/Countdown';
 import { FeedbackFlash } from '../../components/FeedbackFlash';
 import { ExitButton } from '../../components/GameTopBar';
 import { ScoreChip } from '../../components/ScoreChip';
+import { TiltMeter } from '../../components/TiltMeter';
 import { Screen } from '../../components/Screen';
 import { T } from '../../components/Typography';
 import { movieOnMyHeadCards } from '../../data/movieOnMyHead';
@@ -31,7 +31,7 @@ import { formatClock, useCountdown } from '../../engine/useCountdown';
 import { useLeaveGuard } from '../../engine/useLeaveGuard';
 import { useRoundSession } from '../../engine/useRoundSession';
 import { useTiltControls } from '../../engine/useTiltControls';
-import { fonts, gameThemes, motion, palette, radius, space } from '../../theme/tokens';
+import { fonts, gameThemes, motion, palette, space } from '../../theme/tokens';
 
 type Phase = 'prepare' | 'countdown' | 'playing' | 'timeup';
 
@@ -165,7 +165,7 @@ export default function MovieOnMyHeadPlay() {
     },
   });
   const tiltReady = wantsTilt && tilt.status === 'ready';
-  const showButtons = !wantsTilt || tilt.status === 'unavailable' || tilt.status === 'denied';
+  const showButtons = !wantsTilt || tilt.status === 'unavailable';
 
   const tintCorrect = useAnimatedStyle(() => ({ opacity: Math.max(0, -tilt.progress.get()) * 0.55 }));
   const tintSkip = useAnimatedStyle(() => ({ opacity: Math.max(0, tilt.progress.get()) * 0.55 }));
@@ -273,10 +273,7 @@ export default function MovieOnMyHeadPlay() {
               </>
             ) : (
               <>
-                <View style={styles.legend}>
-                  <LegendChip icon="arrow-down" label="Tilt down · Correct" bg={palette.leaf} />
-                  <LegendChip icon="arrow-up" label="Tilt up · Skip" bg={palette.marigold} fg={palette.ink} />
-                </View>
+                <TiltMeter pitch={tilt.pitch} width={Math.min(width * 0.34, 260)} />
                 <T variant="bold" color={theme.fg} size={15} align="center" style={styles.dim}>
                   {tiltReady ? 'Starts automatically when the phone is upright' : 'Checking motion sensors…'}
                 </T>
@@ -375,27 +372,6 @@ export default function MovieOnMyHeadPlay() {
   );
 }
 
-function LegendChip({
-  icon,
-  label,
-  bg,
-  fg = palette.white,
-}: {
-  icon: 'arrow-down' | 'arrow-up';
-  label: string;
-  bg: string;
-  fg?: string;
-}) {
-  return (
-    <View style={[styles.chip, { backgroundColor: bg }]}>
-      <Ionicons name={icon} size={20} color={fg} />
-      <T variant="black" color={fg} size={15} style={styles.chipText}>
-        {label}
-      </T>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   root: {
     paddingTop: space.md,
@@ -432,24 +408,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: space.md,
     paddingHorizontal: space.xl,
-  },
-  legend: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: space.sm,
-  },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: radius.pill,
-  },
-  chipText: {
-    letterSpacing: 1,
-    textTransform: 'uppercase',
   },
   dim: {
     opacity: 0.85,

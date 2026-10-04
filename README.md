@@ -84,7 +84,7 @@ Content is plain typed data, so new packs need no changes to game logic. Append 
 
 ## How the games work
 
-**Movie on My Head** is played in landscape. The phone counts down once it sits upright on someone's forehead. Tilt **down** (screen to the floor) for Correct (+1) and tilt **up** for Skip. The tilt detector needs a clear threshold (40° from the calibrated start position) held for consecutive samples, then a return to neutral and a cooldown before it can fire again, so one nod can never score twice. If motion is unavailable or denied, or you pick **Buttons** on the How to Play screen, large Correct and Skip buttons appear instead. Rounds are 30, 60 or 90 seconds (60 by default), with no repeated cards in a round.
+**Movie on My Head** is played in landscape. The phone counts down once it sits upright on someone's forehead. Tilt **down** (screen to the floor) for Correct (+1) and tilt **up** for Skip. The tilt detector needs a clear threshold (40° from the calibrated start position) held for consecutive samples, then a return to neutral and a cooldown before it can fire again, so one nod can never score twice. Tilt needs no permission — accelerometer data is unrestricted on both platforms — so the app subscribes to the sensor directly and falls back to large Correct and Skip buttons only if no motion data actually arrives, or if you pick **Buttons** on the How to Play screen. Rounds are 30, 60 or 90 seconds (60 by default), with no repeated cards in a round.
 
 **What's Common?** plays 5, 10 or 15 rounds (10 by default) picked at random without repeats. The answer stays hidden until the Reader taps SHOW ANSWER. Only then can the card be swiped (right for Correct, left for Wrong) or scored with the buttons.
 
@@ -100,7 +100,8 @@ Code-level tests cover the engine. These states still need a physical device:
 - [ ] Movie on My Head: auto-countdown when the phone is upright on a forehead
 - [ ] Tilt down = Correct, tilt up = Skip feels natural, and does not trigger from talking or laughing
 - [ ] Rapid nodding scores one card per nod, never two
-- [ ] Motion permission denied (iOS Settings → TFI → Motion & Fitness off) → buttons appear
+- [ ] The tilt meter on the "place the phone on your forehead" screen moves as you tilt
+- [ ] On a device with no usable motion sensor, buttons appear automatically after ~1.5s
 - [ ] Timer reaches 0 → TIME! → results in portrait
 - [ ] Swipe short of the threshold springs back; a flick commits
 - [ ] Exit button, Android back and iOS swipe-back all ask "Leave this round?"
