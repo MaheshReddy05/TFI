@@ -26,6 +26,14 @@
       },
       "predictiveBackGestureEnabled": false
     },
+    "web": {
+      "output": "single",
+      "name": "TFI — Telugu cinema party game",
+      "favicon": "./assets/icon.png"
+    },
+    "experiments": {
+      "baseUrl": "/TFI"
+    },
     "plugins": [
       "expo-router",
       "expo-font",

@@ -44,5 +44,5 @@ Docs: https://docs.expo.dev/eas/index.md
 
 - Game content lives only in `src/data/*.ts`. Never hard-code questions in screens, and never invent new trivia: the supplied datasets are the source of truth.
 - Reusable game logic lives in `src/engine/` (no UI). The tilt detector is a pure state machine in `src/engine/tilt.ts`, covered by tests.
-- Mobile only (iOS + Android). Do not add `react-native-web` or a web target.
+- The product is the iOS + Android app. A `react-native-web` export exists **only** to publish the browser demo to GitHub Pages (`npm run build:web`), and must never drive product or design decisions: don't add web-only features, don't compromise a mobile interaction to suit a browser, and expect sensors and haptics to be absent there.
 - Run `npm run typecheck && npm run lint && npm test` before declaring work done.
